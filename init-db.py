@@ -9,7 +9,7 @@ def char_range(c1, c2):
 
 for col in char_range('A', 'L'):
     for row in range(1, 10):
-        cell = CellModel(row, col)
+        cell = CellModel(col, row)
         db.session.add(cell)
 
 db.session.commit()
