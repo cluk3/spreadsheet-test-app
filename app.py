@@ -18,6 +18,7 @@ class CellModel(db.Model):
         self.row = row
         self.col = col
         self.value = value
+        self.computed = compute_cell_value(value)
 
     def serialize(self):
         return {
@@ -26,7 +27,7 @@ class CellModel(db.Model):
             "col": self.col,
             "value": self.value,
             "computed": self.computed
-        }
+                }
 
 class CellSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -35,6 +36,62 @@ class CellSchema(ma.SQLAlchemyAutoSchema):
 cell_schema = CellSchema()
 spreadsheet_schema = CellSchema(many=True)
 
+@app.route('/api/cell/<string:col>_<int:row>/')
+def get_cell(col, row):
+    print(col, row)
+    return cell_schema.jsonify(CellModel.query.get((col, row)))
+
+
+@app.route('/api/cells/')
+def get_spreadsheet():
+    return jsonify(spreadsheet_schema.dump(CellModel.query.all()))
+
+
+@app.route('/api/cell/', methods=['POST'])
+def create_cell():
+    if not request.json or not 'col' in request.json or not 'row' in request.json:
+        abort(400)
+    cell = CellModel(request.json['row'], request.json['col'], request.json['value'])
+    db.session.add(cell)
+    db.session.commit()
+    return cell_schema.jsonify(cell), 201
+
+
+@app.route('/api/cell/<string:col>_<int:row>/', methods=['DELETE'])
+def delete_cell(col, row):
+    db.session.delete(CellModel.query.get((col, row)))
+    db.session.commit()
+    return jsonify({'result': True})
+
+
+@app.route('/api/cell/<string:col>_<int:row>/', methods=['PUT'])
+def update_cell(col, row):
+    cell = CellModel.query.get((col, row))
+    cell.value = request.json.get('value')
+    cell.computed = compute_cell_value(cell.value)
+    db.session.add(cell)
+    db.session.commit()
+    return cell_schema.jsonify(cell)
+
+def compute_cell_value(value):
+    if (value is None):
+        return 0
+    if not value.startswith("="):
+        return int(value)
+
+    cells = value[1:].split("+")
+    sum = 0
+    for cell_id in cells:
+        cell = CellModel.query.get(toTuple(cell_id))
+        print(cell)
+        sum += cell.computed
+
+    return sum
+    
+def toTuple(cell_str):
+    col = cell_str[:1]
+    row = cell_str[1:2]
+    return col, row
 
 if __name__ == '__main__':
     app.run(debug=True)
