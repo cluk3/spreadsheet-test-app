@@ -1,0 +1,15 @@
+from app import db, CellModel
+
+db.drop_all()
+db.create_all()
+
+def char_range(c1, c2):
+    for c in range(ord(c1), ord(c2)+1):
+        yield chr(c)
+
+for col in char_range('A', 'L'):
+    for row in range(1, 10):
+        cell = CellModel(row, col)
+        db.session.add(cell)
+
+db.session.commit()
