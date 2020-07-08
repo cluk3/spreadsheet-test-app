@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, abort, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from dependency import create_dependency_graph
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -8,6 +9,8 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
 # TODO: check circular dependencies
+# TODO: check cell referencing itself
+# TODO: check =A1+A1
 
 class CellModel(db.Model):
     __tablename__ = 'cell'
@@ -22,15 +25,6 @@ class CellModel(db.Model):
         self.value = value
         self.computed = compute_cell_value(value, col, row)
 
-    # TODO: check if it is necessary
-    def serialize(self):
-        return {
-            "id": self.id,
-            "row": self.row,
-            "col": self.col,
-            "value": self.value,
-            "computed": self.computed
-                }
 
 class CellDependenciesModel(db.Model):
     __tablename__ = 'celldependencies'
@@ -39,7 +33,7 @@ class CellDependenciesModel(db.Model):
     dependent_col = db.Column(db.CHAR(), primary_key=True, unique=False)
     dependent_row = db.Column(db.Integer, primary_key=True, unique=False)
 
-    _table_args__ = (
+    __table_args__ = (
         db.ForeignKeyConstraint(
             ['dependee_col', 'dependee_row'],
             ['cell.col', 'cell.row'],
@@ -104,6 +98,7 @@ def update_cell(col, row):
 
     # if it was a number and stays a number, do nothin
     # else update dependencies
+
     old_computed = cell.computed
     cell.computed = compute_cell_value(cell.value, cell.col, cell.row)
     db.session.add(cell)
@@ -112,6 +107,7 @@ def update_cell(col, row):
     # check dependencies
     dependencies = CellDependenciesModel.query.filter_by(dependee_col=cell.col, dependee_row=cell.row).all()
 
+    # TODO: recursive update of deps
     for dependency in dependencies:
         dep_cell = CellModel.query.get((dependency.dependent_col, dependency.dependent_row))
         dep_cell.computed += cell.computed - old_computed
