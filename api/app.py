@@ -1,10 +1,14 @@
+import os
 from flask import Flask, jsonify, abort, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from dependency import create_dependency_graph
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+cors = CORS(app, resources={r"/api/*": {"origins": os.environ.get('ALLOWED_ORIGINS', "*")}})
+
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 
@@ -118,8 +122,8 @@ def update_cell(col, row):
     return jsonify(spreadsheet_schema.dump(updated_cells))
 
 def compute_cell_value(value, col, row):
-    if (value is None):
-        return 0
+    if (value is None or value == ""):
+        return None
     if not value.startswith("="):
         return int(value)
 
@@ -130,7 +134,7 @@ def compute_cell_value(value, col, row):
         dependency = CellDependenciesModel(dependee_col=cell.col, dependee_row=cell.row, dependent_col=col, dependent_row=row)
         db.session.add(dependency)
         db.session.commit()
-        sum += cell.computed
+        sum += 0 if cell.computed is None else cell.computed
 
     return sum
     
