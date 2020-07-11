@@ -34,10 +34,8 @@ used to implement an extremely simple financial model.
 The sample code distributed with this package is provided to you as a starting
 point if you'd like to use it.
 
-## Setup
+## TODO
 
-1. Set up your virtualenv: `virtualenv -p python3 interview_venv`
-2. Source the `activate` script: `source interview_venv/bin/activate`
-3. Install the dependencies in your virtualenv:
-   `pip install -r requirements.txt`
-4. Run the server `FLASK_DEBUG=1 FLASK_APP=server.py flask run`
+* check circular dependencies
+* check cell referencing itself
+* check =A1+A1

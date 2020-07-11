@@ -7,14 +7,10 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-cors = CORS(app, resources={r"/api/*": {"origins": os.environ.get('ALLOWED_ORIGINS', "*")}})
+cors = CORS(app, resources={r"/api/*": {"origins": os.environ.get('ALLOWED_ORIGINS', "*").split(",")}})
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-
-# TODO: check circular dependencies
-# TODO: check cell referencing itself
-# TODO: check =A1+A1
 
 class CellModel(db.Model):
     __tablename__ = 'cell'
