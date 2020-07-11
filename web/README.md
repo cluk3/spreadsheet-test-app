@@ -28,6 +28,14 @@ Your app is ready to be deployed!
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 ### Todo
+
     - keyboard navigation of cells
     - select next cell on enter
-    - highlight referenced cells
+    - highlight referenced cells - DONE
+    - check for same cell referred twice in formula
+    - write tests
+    - test on different browsers
+    - make it a bit responsive
+    - deploy
+    - make it prettier
+    - error management (fetch)

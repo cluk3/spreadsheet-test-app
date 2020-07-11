@@ -1,18 +1,12 @@
-import React, { useContext } from "react";
+import React from "react";
 import "twin.macro";
-import { AppContext } from "../AppContext";
+import { CellValueInput } from "./CellValueInput";
 
-export const Formula = () => {
-  const { state } = useContext(AppContext);
-
+export const Formula = React.memo(() => {
   return (
     <div tw="h-8 w-full flex">
-      <span tw="w-8">fx</span>
-      <input
-        tw="flex-auto outline-none"
-        type="text"
-        value={state.selectedCell.value || ""}
-      />
+      <span tw="flex items-center justify-center w-8 text-lg">Fx</span>
+      <CellValueInput tw="px-2" />
     </div>
   );
-};
+});
