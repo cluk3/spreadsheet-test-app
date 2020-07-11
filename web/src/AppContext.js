@@ -98,11 +98,12 @@ const reducer = (state, { type, payload }) => {
         },
       };
     case "set_edit_value":
-      const inputText = payload;
+      const inputText = payload.toUpperCase();
       return {
         ...state,
         editMode: {
           ...state.editMode,
+          isPristine: false,
           editValue: VALID_INPUT_REGEX.test(inputText)
             ? inputText
             : state.editMode.editValue,
@@ -110,15 +111,13 @@ const reducer = (state, { type, payload }) => {
         },
       };
     case "start_editing":
-      editValue =
-        payload && VALID_INPUT_REGEX.test(payload)
-          ? payload
-          : state.editMode.editValue;
+      editValue = state.editMode.editValue;
       return {
         ...state,
         editMode: {
           ...state.editMode,
           isEditing: true,
+          isPristine: true,
           editValue,
           ...getReferredCells(editValue),
         },

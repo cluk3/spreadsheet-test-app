@@ -7,7 +7,7 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
   const { state, dispatch } = useContext(AppContext);
   const {
     selectedCell,
-    editMode: { editValue, acceptsRefs },
+    editMode: { editValue, acceptsRefs, isPristine },
   } = state;
 
   const setEditValue = useCallback(
@@ -35,11 +35,11 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
 
   const handleKeyPress = useCallback(
     (evt) => {
-      if (evt.key === "Enter") {
+      if (!isPristine && evt.key === "Enter") {
         handleCellUpdate();
       }
     },
-    [handleCellUpdate]
+    [handleCellUpdate, isPristine]
   );
   const handleBlur = useCallback(
     (evt) => {

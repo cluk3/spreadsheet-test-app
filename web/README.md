@@ -30,6 +30,7 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 ### Todo
 
     - keyboard navigation of cells
+    - save value on change selected cell
     - select next cell on enter
     - highlight referenced cells - DONE
     - check for same cell referred twice in formula
