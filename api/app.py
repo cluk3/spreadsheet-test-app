@@ -103,7 +103,7 @@ def update_cell(col, row):
     # if it was a number and stays a number, do nothin
     # else update dependencies
 
-    old_computed = cell.computed
+    old_computed = defaultToZero(cell.computed)
     cell.computed = compute_cell_value(cell.value, cell.col, cell.row)
     db.session.add(cell)
     updated_cells = [cell]
@@ -131,10 +131,12 @@ def compute_cell_value(value, col, row):
     sum = 0
     for cell_id in cells:
         cell = CellModel.query.get(toTuple(cell_id))
-        dependency = CellDependenciesModel(dependee_col=cell.col, dependee_row=cell.row, dependent_col=col, dependent_row=row)
-        db.session.add(dependency)
-        db.session.commit()
-        sum += 0 if cell.computed is None else cell.computed
+        dependency = CellDependenciesModel.query.get((cell.col, cell.row, col, row))
+        if dependency is None:
+            dependency = CellDependenciesModel(dependee_col=cell.col, dependee_row=cell.row, dependent_col=col, dependent_row=row)
+            db.session.add(dependency)
+            db.session.commit()
+        sum += defaultToZero(cell.computed)
 
     return sum
     
@@ -142,6 +144,9 @@ def toTuple(cell_str):
     col = cell_str[:1]
     row = cell_str[1:2]
     return col, row
+
+def defaultToZero(value):
+    return 0 if value is None else value
 
 if __name__ == '__main__':
     app.run(debug=True)
