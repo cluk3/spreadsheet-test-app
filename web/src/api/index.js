@@ -10,7 +10,9 @@ export const getAll = async () => {
 };
 
 export const updateCellValue = async (id, newValue) => {
-  const res = await fetch(`${apiEndpoint}/api/cell/${id[0]}_${id[1]}/`, {
+  const [colId] = id;
+  const rowId = id.slice(1);
+  const res = await fetch(`${apiEndpoint}/api/cell/${colId}_${rowId}/`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

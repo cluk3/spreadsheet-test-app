@@ -36,6 +36,7 @@ export const Grid = () => {
   const {
     state: { cells, editMode, selectedCell },
     dispatch,
+    handleCellUpdate,
   } = useContext(AppContext);
 
   const startEditing = useCallback(() => {
@@ -48,10 +49,11 @@ export const Grid = () => {
         selectedCell.id !== cellId &&
           dispatch({ type: "add_referred_cell", payload: cellId });
       } else {
+        editMode.isEditing && handleCellUpdate();
         dispatch({ type: "selected_cell_change", payload: cellId });
       }
     },
-    [dispatch, editMode, selectedCell.id]
+    [dispatch, editMode, selectedCell.id, handleCellUpdate]
   );
 
   return (

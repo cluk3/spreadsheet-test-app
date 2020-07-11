@@ -1,12 +1,11 @@
 import React, { useCallback, useContext } from "react";
 import { AppContext } from "../AppContext";
-import { updateCellValue } from "../api";
+
 import "twin.macro";
 
 export const CellValueInput = React.memo(({ className, ...props }) => {
-  const { state, dispatch } = useContext(AppContext);
+  const { state, dispatch, handleCellUpdate } = useContext(AppContext);
   const {
-    selectedCell,
     editMode: { editValue, acceptsRefs, isPristine },
   } = state;
 
@@ -27,11 +26,6 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
     },
     [setEditValue]
   );
-
-  const handleCellUpdate = useCallback(async () => {
-    const updatedCells = await updateCellValue(selectedCell.id, editValue);
-    dispatch({ type: "update_cells", payload: updatedCells });
-  }, [dispatch, selectedCell, editValue]);
 
   const handleKeyPress = useCallback(
     (evt) => {

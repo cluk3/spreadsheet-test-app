@@ -1,5 +1,5 @@
-import React, { useEffect, useReducer } from "react";
-import { getAll } from "./api";
+import React, { useEffect, useReducer, useCallback } from "react";
+import { getAll, updateCellValue } from "./api";
 
 export const AppContext = React.createContext({});
 
@@ -15,8 +15,18 @@ export const AppContextProvider = ({ children }) => {
     });
   }, []);
 
+  console.debug("state: ", state);
+
+  const handleCellUpdate = useCallback(async () => {
+    const updatedCells = await updateCellValue(
+      state.selectedCell.id,
+      state.editMode.editValue
+    );
+    dispatch({ type: "update_cells", payload: updatedCells });
+  }, [dispatch, state.selectedCell, state.editMode.editValue]);
+
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch, handleCellUpdate }}>
       {children}
     </AppContext.Provider>
   );
