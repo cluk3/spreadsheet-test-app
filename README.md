@@ -36,6 +36,7 @@ point if you'd like to use it.
 
 ## TODO
 
-* check circular dependencies
-* check cell referencing itself
-* check =A1+A1
+* check circular dependencies - Done!
+* check cell referencing itself - Done!
+* check =A1+A1 - Done!
+* split app in different files

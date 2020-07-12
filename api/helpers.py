@@ -13,12 +13,6 @@ def is_int(s):
         return s[1:].isdigit()
     return s.isdigit()
 
-def to_tuple_list(refs):
-    result = []
-    for ref in refs:
-        result.append((ref.dependee_col, ref.dependee_row))
-    return result
-
-valid_value_re = re.compile(r"^-?\d+$|^=(-?\d+|[A-J]{1}(10|\d{1}))(\+(-?\d+|[A-J]{1}(10|\d{1})))*$")
+valid_value_re = re.compile(r"^-?\d{1,18}$|^=(-?\d{1,18}|[A-J]{1}(10|\d{1}))(\+(-?\d{1,18}|[A-J]{1}(10|\d{1})))*$")
 def is_invalid_value(value):
-    return re.search(valid_value_re, value) is None
+    return value != "" and re.search(valid_value_re, value) is None
