@@ -1,19 +1,30 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { AppContext } from "../AppContext";
+import tw, { styled } from "twin.macro";
 
-import "twin.macro";
+const VALID_INPUT_REGEX = /^(-?\d*$|=)/;
+
+const Input = styled.input(({ hasInvalidInput }) => [
+  tw`w-full h-full outline-none px-1`,
+  hasInvalidInput && tw`bg-opacity-25 bg-red-200`,
+]);
 
 export const CellValueInput = React.memo(({ className, ...props }) => {
   const { state, dispatch, handleCellUpdate } = useContext(AppContext);
   const {
-    editMode: { editValue, acceptsRefs, isPristine },
+    editMode: { editValue, acceptsRefs },
   } = state;
+  const [hasInvalidInput, setInvalidInput] = useState(false);
 
   const setEditValue = useCallback(
     (value) => {
-      dispatch({ type: "set_edit_value", payload: value });
+      const isValidInput = VALID_INPUT_REGEX.test(value);
+      if (isValidInput) {
+        dispatch({ type: "set_edit_value", payload: value });
+      }
+      setInvalidInput(!isValidInput);
     },
-    [dispatch]
+    [dispatch, setInvalidInput]
   );
 
   const startEditing = useCallback(() => {
@@ -29,11 +40,11 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
 
   const handleKeyPress = useCallback(
     (evt) => {
-      if (!isPristine && evt.key === "Enter") {
+      if (evt.key === "Enter") {
         handleCellUpdate();
       }
     },
-    [handleCellUpdate, isPristine]
+    [handleCellUpdate]
   );
   const handleBlur = useCallback(
     (evt) => {
@@ -42,15 +53,15 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
     [acceptsRefs]
   );
   return (
-    <input
+    <Input
       className={className}
-      tw="w-full h-full outline-none px-1"
       type="text"
       value={editValue}
+      hasInvalidInput={hasInvalidInput}
       autoComplete="off"
       onChange={handleChange}
       onKeyPress={handleKeyPress}
-      onFocus={startEditing}
+      onFocus={acceptsRefs ? void 0 : startEditing}
       autoFocus={acceptsRefs}
       onBlur={handleBlur}
       {...props}

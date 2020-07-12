@@ -3,7 +3,6 @@ import { getAll, updateCellValue } from "./api";
 
 export const AppContext = React.createContext({});
 
-const VALID_INPUT_REGEX = /^(-?\d*$|=)/;
 const REFERRED_CELLS_REGEX = /(?=|\+)([A-J](10|\d))/g;
 
 export const AppContextProvider = ({ children }) => {
@@ -15,14 +14,17 @@ export const AppContextProvider = ({ children }) => {
     });
   }, []);
 
-  console.debug("state: ", state);
-
   const handleCellUpdate = useCallback(async () => {
-    const updatedCells = await updateCellValue(
-      state.selectedCell.id,
-      state.editMode.editValue
-    );
-    dispatch({ type: "update_cells", payload: updatedCells });
+    try {
+      const updatedCells = await updateCellValue(
+        state.selectedCell.id,
+        state.editMode.editValue
+      );
+      dispatch({ type: "update_cells", payload: updatedCells });
+    } catch (err) {
+      console.error(err);
+      dispatch({ type: "end_editing" });
+    }
   }, [dispatch, state.selectedCell, state.editMode.editValue]);
 
   return (
@@ -109,14 +111,12 @@ const reducer = (state, { type, payload }) => {
       };
     case "set_edit_value":
       const inputText = payload.toUpperCase();
+
       return {
         ...state,
         editMode: {
           ...state.editMode,
-          isPristine: false,
-          editValue: VALID_INPUT_REGEX.test(inputText)
-            ? inputText
-            : state.editMode.editValue,
+          editValue: inputText,
           ...getReferredCells(inputText),
         },
       };
@@ -127,7 +127,6 @@ const reducer = (state, { type, payload }) => {
         editMode: {
           ...state.editMode,
           isEditing: true,
-          isPristine: true,
           editValue,
           ...getReferredCells(editValue),
         },

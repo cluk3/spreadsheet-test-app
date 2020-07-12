@@ -30,13 +30,12 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 ### Todo
 
     - keyboard navigation of cells
-    - save value on change selected cell
+    - save value on change selected cell - Done!
     - select next cell on enter
     - highlight referenced cells - DONE
-    - check for same cell referred twice in formula
     - write tests
     - test on different browsers
     - make it a bit responsive
-    - deploy
+    - deploy - Done!
     - make it prettier
-    - error management (fetch)
+    - error management (fetch)  - Done! - needs improvement

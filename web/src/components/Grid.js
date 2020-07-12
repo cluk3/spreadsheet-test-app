@@ -12,8 +12,8 @@ const getRefColors = ({ colors }) =>
   REF_COLORS.map((color) => colors[color]["500"]);
 
 const HeadingCell = styled.th`
-  width: 9vw;
-  ${tw`border border-solid border-gray-600`}
+  width: calc(100% / 11);
+  ${tw`border border-solid border-gray-600 select-none`}
 `;
 
 const CellContainer = styled(HeadingCell)(({ isSelected, theme, refIndex }) => [
@@ -61,22 +61,23 @@ export const Grid = () => {
       <ColumnHeading />
       <tbody>
         {ROWS.map((rowId) => (
-          <tr key={rowId} tw="w-full h-8 flex-auto bg-gray-200 flex">
+          <tr key={rowId} tw="w-full h-10 flex-auto bg-gray-200 flex">
             <HeadingCell>{rowId}</HeadingCell>
             {COLUMNS.map((colId) => {
               const cellId = colId + rowId;
-              const { computed } = cells[cellId];
+              const { computed, has_ref_error } = cells[cellId];
               const isSelected = cellId === selectedCell.id;
               const refIndex = editMode.referredCells.indexOf(cellId);
               return (
                 <CellContainer
                   key={cellId}
-                  onClick={handleCellClick(cellId)}
+                  onClick={isSelected ? void 0 : handleCellClick(cellId)}
                   isSelected={isSelected}
                   refIndex={refIndex}
                 >
                   <Cell
                     computedValue={computed}
+                    hasRefError={has_ref_error}
                     isSelected={isSelected}
                     isEditing={isSelected && editMode.isEditing}
                     startEditing={startEditing}
