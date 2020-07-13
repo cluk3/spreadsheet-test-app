@@ -10,7 +10,7 @@ const Input = styled.input(({ hasInvalidInput }) => [
 ]);
 
 export const CellValueInput = React.memo(({ className, ...props }) => {
-  const { state, dispatch, handleCellUpdate } = useContext(AppContext);
+  const { state, dispatch, handleEndEditing } = useContext(AppContext);
   const {
     editMode: { editValue, acceptsRefs },
   } = state;
@@ -41,10 +41,11 @@ export const CellValueInput = React.memo(({ className, ...props }) => {
   const handleKeyPress = useCallback(
     (evt) => {
       if (evt.key === "Enter") {
-        handleCellUpdate();
+        handleEndEditing();
+        dispatch({ type: "keyboard_navigation", payload: "Enter" });
       }
     },
-    [handleCellUpdate]
+    [handleEndEditing, dispatch]
   );
   const handleBlur = useCallback(
     (evt) => {

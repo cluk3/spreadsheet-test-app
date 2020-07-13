@@ -1,12 +1,14 @@
-import React, { useContext, useCallback } from "react";
+import React, { useContext, useCallback, useEffect } from "react";
 import tw, { styled } from "twin.macro";
 import { AppContext } from "../AppContext";
 import { Cell } from "./Cell";
+import { LoadingSnake } from "./LoadingSnake";
 
 const COLUMNS = Array.from("ABCDEFGHIJ");
 const ROWS = Array.from({ length: 10 }, (_, i) => i + 1);
 
 const REF_COLORS = ["orange", "green", "yellow", "teal", "pink", "blue"];
+const EVENT_KEYS = ["ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight", "Tab"];
 
 const getRefColors = ({ colors }) =>
   REF_COLORS.map((color) => colors[color]["500"]);
@@ -17,7 +19,7 @@ const HeadingCell = styled.th`
 `;
 
 const CellContainer = styled(HeadingCell)(({ isSelected, theme, refIndex }) => [
-  tw`bg-white border-gray-400`,
+  tw`bg-white border-gray-400 relative`,
   isSelected &&
     `
   z-index: 2;
@@ -34,10 +36,28 @@ const CellContainer = styled(HeadingCell)(({ isSelected, theme, refIndex }) => [
 
 export const Grid = () => {
   const {
-    state: { cells, editMode, selectedCell },
+    state: { cells, editMode, selectedCell, loadingCellId },
     dispatch,
-    handleCellUpdate,
+    handleEndEditing,
   } = useContext(AppContext);
+
+  useEffect(() => {
+    const handleKeyDown = (evt) => {
+      if (!editMode.isEditing) {
+        if (EVENT_KEYS.includes(evt.key)) {
+          dispatch({ type: "keyboard_navigation", payload: evt.key });
+          evt.key === "Tab" && evt.preventDefault();
+        } else {
+          dispatch({ type: "start_editing" });
+          evt.key === "Enter" && evt.preventDefault();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [editMode.isEditing]);
 
   const startEditing = useCallback(() => {
     dispatch({ type: "start_editing" });
@@ -49,11 +69,11 @@ export const Grid = () => {
         selectedCell.id !== cellId &&
           dispatch({ type: "add_referred_cell", payload: cellId });
       } else {
-        editMode.isEditing && handleCellUpdate();
+        editMode.isEditing && handleEndEditing();
         dispatch({ type: "selected_cell_change", payload: cellId });
       }
     },
-    [dispatch, editMode, selectedCell.id, handleCellUpdate]
+    [dispatch, editMode, selectedCell.id, handleEndEditing]
   );
 
   return (
@@ -75,6 +95,7 @@ export const Grid = () => {
                   isSelected={isSelected}
                   refIndex={refIndex}
                 >
+                  {loadingCellId === cellId && <LoadingSnake />}
                   <Cell
                     computedValue={computed}
                     hasRefError={has_ref_error}

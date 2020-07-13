@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState, useEffect } from "react";
+import React, { useCallback } from "react";
 import tw, { styled } from "twin.macro";
 import { CellValueInput } from "./CellValueInput";
 
@@ -9,46 +9,22 @@ const Span = styled.span(({ hasRefError }) => [
 
 export const Cell = React.memo(
   ({ computedValue, isSelected, startEditing, isEditing, hasRefError }) => {
-    const isFocused = useRef();
-    const [showInput, setShowInput] = useState(false);
-
-    useEffect(() => {
-      if (!isEditing && showInput) {
-        setShowInput(false);
+    const handleDoubleClick = useCallback(() => {
+      if (!isEditing) {
+        startEditing();
       }
       // we only want this effect to run when isEditing changes
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isEditing]);
 
-    const handleKeyDown = useCallback(
-      (evt) => {
-        if (isSelected && !isEditing) {
-          setShowInput(true);
-          if (evt.key === "Enter") {
-            evt.preventDefault();
-          }
-        }
-      },
-      [isSelected, isEditing]
-    );
-    const handleDoubleClick = useCallback(() => {
-      if (!isEditing) {
-        setShowInput(true);
-      }
-    }, [isEditing]);
-
     return (
       <div
-        tabIndex="0"
         isSelected={isSelected}
-        onKeyDown={handleKeyDown}
         onDoubleClick={handleDoubleClick}
-        tw="h-full outline-none text-sm font-normal"
-        onFocus={() => (isFocused.current = true)}
-        onBlur={() => (isFocused.current = false)}
+        tw="h-full text-sm font-normal"
       >
-        {showInput ? (
-          <CellValueInput autoFocus={isFocused.current}></CellValueInput>
+        {isEditing ? (
+          <CellValueInput autoFocus></CellValueInput>
         ) : (
           <Span hasRefError={hasRefError}>
             {hasRefError ? "#REF!" : computedValue}

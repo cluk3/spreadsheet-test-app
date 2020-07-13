@@ -1,5 +1,7 @@
 import React, { useEffect, useReducer, useCallback } from "react";
 import { getAll, updateCellValue } from "./api";
+import { LoadingRipple } from "./components/LoadingRipple";
+import { eventKeysToAction } from "./keyboardNavigation";
 
 export const AppContext = React.createContext({});
 
@@ -14,21 +16,29 @@ export const AppContextProvider = ({ children }) => {
     });
   }, []);
 
-  const handleCellUpdate = useCallback(async () => {
-    try {
-      const updatedCells = await updateCellValue(
-        state.selectedCell.id,
-        state.editMode.editValue
-      );
-      dispatch({ type: "update_cells", payload: updatedCells });
-    } catch (err) {
-      console.error(err);
-      dispatch({ type: "end_editing" });
+  const handleEndEditing = useCallback(async () => {
+    dispatch({ type: "end_editing" });
+    const cellToUpdate = state.selectedCell;
+    if (state.selectedCell.value !== state.editMode.editValue) {
+      try {
+        dispatch({ type: "start_loading", payload: cellToUpdate.id });
+        const updatedCells = await updateCellValue(
+          cellToUpdate.id,
+          state.editMode.editValue
+        );
+        dispatch({ type: "update_cells", payload: updatedCells });
+      } catch (err) {
+        console.error(err);
+        dispatch({ type: "show_error_msg", payload: err });
+      } finally {
+        dispatch({ type: "end_loading", payload: cellToUpdate.id });
+      }
     }
   }, [dispatch, state.selectedCell, state.editMode.editValue]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, handleCellUpdate }}>
+    <AppContext.Provider value={{ state, dispatch, handleEndEditing }}>
+      {state.isBootstraping && <LoadingRipple />}
       {children}
     </AppContext.Provider>
   );
@@ -52,6 +62,10 @@ const getReferredCells = (inputText) => {
 };
 
 const reducer = (state, { type, payload }) => {
+  if (process.env.NODE_ENV === "development") {
+    console.debug("state", state);
+    console.debug("action: ", type);
+  }
   let editValue;
   switch (type) {
     case "hydrate":
@@ -70,6 +84,7 @@ const reducer = (state, { type, payload }) => {
           ...state.editMode,
           editValue: cells["A1"].value || "",
         },
+        isBootstraping: false,
       };
     case "selected_cell_change":
       const selectedCellId = payload;
@@ -81,10 +96,19 @@ const reducer = (state, { type, payload }) => {
         ...state,
         selectedCell,
         editMode: {
+          ...state.editMode,
           editValue: selectedCell.value || "",
-          isEditing: false,
-          acceptsRefs: false,
-          referredCells: [],
+        },
+      };
+    case "keyboard_navigation":
+      const nextSelectionId = eventKeysToAction[payload](state.selectedCell.id);
+
+      return {
+        ...state,
+        selectedCell: state.cells[nextSelectionId],
+        editMode: {
+          ...state.editMode,
+          editValue: state.cells[nextSelectionId].value || "",
         },
       };
     case "update_cells":
@@ -101,12 +125,6 @@ const reducer = (state, { type, payload }) => {
             };
             return cells;
           }, {}),
-        },
-        editMode: {
-          ...state.editMode,
-          isEditing: false,
-          acceptsRefs: false,
-          referredCells: [],
         },
       };
     case "set_edit_value":
@@ -151,6 +169,16 @@ const reducer = (state, { type, payload }) => {
           ...getReferredCells(editValue),
         },
       };
+    case "start_loading":
+      return {
+        ...state,
+        loadingCellId: payload,
+      };
+    case "end_loading":
+      return {
+        ...state,
+        loadingCellId: null,
+      };
     default:
       return state;
   }
@@ -172,4 +200,6 @@ const initialState = {
     acceptsRefs: false,
     referredCells: [],
   },
+  loadingCellId: null,
+  isBootstraping: true,
 };

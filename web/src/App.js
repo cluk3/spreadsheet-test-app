@@ -1,6 +1,5 @@
 import React from "react";
 import "tailwindcss/dist/base.min.css";
-import "twin.macro";
 import { AppContextProvider } from "./AppContext";
 import { Header } from "./components/Header";
 import { Main } from "./components/Main";
