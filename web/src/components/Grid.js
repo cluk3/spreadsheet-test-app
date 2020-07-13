@@ -101,7 +101,6 @@ export const Grid = () => {
                   <Cell
                     computedValue={computed}
                     hasRefError={has_ref_error}
-                    isSelected={isSelected}
                     isEditing={isSelected && editMode.isEditing}
                     startEditing={startEditing}
                   />

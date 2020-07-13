@@ -26,16 +26,3 @@ The build is minified and the filenames include the hashes.<br />
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### Todo
-
-    - keyboard navigation of cells
-    - save value on change selected cell - Done!
-    - select next cell on enter
-    - highlight referenced cells - DONE
-    - write tests
-    - test on different browsers
-    - make it a bit responsive
-    - deploy - Done!
-    - make it prettier
-    - error management (fetch)  - Done! - needs improvement

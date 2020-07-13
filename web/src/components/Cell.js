@@ -8,7 +8,7 @@ const Span = styled.span(({ hasRefError }) => [
 ]);
 
 export const Cell = React.memo(
-  ({ computedValue, isSelected, startEditing, isEditing, hasRefError }) => {
+  ({ computedValue, startEditing, isEditing, hasRefError }) => {
     const handleDoubleClick = useCallback(() => {
       if (!isEditing) {
         startEditing();
@@ -18,11 +18,7 @@ export const Cell = React.memo(
     }, [isEditing]);
 
     return (
-      <div
-        isSelected={isSelected}
-        onDoubleClick={handleDoubleClick}
-        tw="h-full text-sm font-normal"
-      >
+      <div onDoubleClick={handleDoubleClick} tw="h-full text-sm font-normal">
         {isEditing ? (
           <CellValueInput autoFocus></CellValueInput>
         ) : (
