@@ -57,6 +57,8 @@ export const Grid = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
+    // we only want this effect to run when isEditing changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editMode.isEditing]);
 
   const startEditing = useCallback(() => {
